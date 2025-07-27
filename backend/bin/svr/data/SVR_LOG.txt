@@ -1,0 +1,54 @@
+SVR x64 version 43 (27/07/2025 22:17:55)
+This is a standalone version of SVR. Interoperability with other applications may not work
+For more information see https://github.com/crashfort/SourceDemoRender
+Using operating system Windows 10 Home version 2009 build 26100
+Using processor 13th Gen Intel(R) Core(TM) i9-13900HX (32 cpus)
+The system has 32575 mb of memory (11081 mb usable)
+Using graphics device 2860 by vendor 10de
+Found 2 games
+Starting Team Fortress 2 (tf2_renderdemo.ini). If launching doesn't work then make sure any antivirus is disabled
+Launcher finished, rest of the log is from the game
+---------------------------------------------------
+Hello from the game
+Waiting for game libraries:
+- tier0.dll
+- engine.dll
+- shaderapidx9.dll
+- client.dll
+Using pattern 1 in array GAME_START_MOVIE_OVERRIDES
+Using pattern 1 in array GAME_END_MOVIE_OVERRIDES
+Using pattern 2 in array GAME_FILTER_TIME_OVERRIDES
+Using pattern 2 in array GAME_CVAR_RESTRICT_PROXIES
+Using pattern 1 in array GAME_ENGINE_CLIENT_COMMAND_PROXIES
+Using pattern 1 in array GAME_CMD_ARGS_PROXIES
+Using pattern 1 in array GAME_D3D9EX_DEVICE_PTR_PROXIES
+Using pattern 1 in array GAME_ENTITY_VELOCITY_PROXIES
+Using pattern 1 in array GAME_PLAYER_BY_INDEX_PROXIES
+Using pattern 1 in array GAME_SPEC_TARGET_PROXIES
+No pattern used in array GAME_LOCAL_PLAYER_PROXIES
+No pattern used in array GAME_SPEC_TARGET_OR_LOCAL_PLAYER_PROXIES
+Using pattern 2 in array GAME_SND_PAINT_TIME_PROXIES
+Using pattern 3 in array GAME_SND_PAINT_CHANS_OVERRIDES
+No pattern used in array GAME_SND_TX_STEREO_OVERRIDES
+Using pattern 0 in array GAME_SND_DEVICE_TX_SAMPLES_OVERRIDES
+Using pattern 0 in array GAME_SND_PAINT_BUFFER_PROXIES
+Using pattern 1 in array GAME_SIGNON_STATE_PROXIES
+Game caps:
+- GAME_CAP_HAS_CORE
+- GAME_CAP_HAS_AUDIO
+- GAME_CAP_HAS_VIDEO
+- GAME_CAP_HAS_AUTOSTOP
+- GAME_CAP_D3D9EX_VIDEO
+- GAME_CAP_AUDIO_DEVICE_1_5
+Using game video backend D3D9Ex
+Using game audio backend AudioV1
+Init for a D3D9Ex game
+Started encoder process
+Running cfg svr_movie_start.cfg
+Starting movie to idk.mov
+Ending movie after 15.32 seconds (1789 frames, 116.78 fps)
+Running cfg svr_movie_end.cfg
+Running cfg svr_movie_start.cfg
+Starting movie to idk.mov
+Ending movie after 14.61 seconds (1790 frames, 122.53 fps)
+Running cfg svr_movie_end.cfg

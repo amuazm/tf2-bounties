@@ -1,0 +1,12 @@
+SVR x64 version 43 (27/07/2025 22:18:03)
+For more information see https://github.com/crashfort/SourceDemoRender
+Encoder ready
+Starting encoder
+Using video encoder dnxhr
+Using audio encoder aac
+Ending encoder
+Starting encoder
+Using video encoder dnxhr
+Using audio encoder aac
+Ending encoder
+Encoder finished

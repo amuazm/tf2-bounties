@@ -1,0 +1,21 @@
+body {
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  padding: 20px;
+}
+
+#root {
+  max-width: 800px;
+  text-align: center;
+}
+
+pre {
+  text-align: left;
+  background: #333;
+  padding: 15px;
+  border-radius: 5px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
