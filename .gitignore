@@ -5,3 +5,8 @@ uploads/
 *.log
 .env
 .DS_Store
+temp/
+tf2_renderdemo.ini
+tf2_renderdemo_profile.ini
+*_LOG.txt
+movies/
