@@ -1,7 +1,7 @@
 import { exec, spawn } from "child_process"
-import { promisify } from "util"
 import { log } from "console"
 import path from "path"
+import { promisify } from "util"
 
 const execPromise = promisify(exec)
 
@@ -87,41 +87,46 @@ export class DemoManager {
                 }
             }
 
+            log(groups)
+
+            const demoName = path.basename(filePath, path.extname(filePath));
+            let command = `start /wait cmd /c "` +
+                `RenderDemo.exe ` +
+                `-exepath "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Team Fortress 2\\tf_win64.exe" ` +
+                `-demo "${path.resolve(filePath)}" ` +
+                `-out "movie.mov" ` +
+                `-launch "-width 1920 -height 1080" ` +
+                `-cmd "cl_drawhud 0; tf_use_min_viewmodels 0" ` +
+                `-sdrdir "${path.resolve(DemoManager.SVR_DIR)}" ` +
+                `-loglevel debug ` +
+                `-ranges ` +
+                `"`;
+
             // Process groups sequentially
             for (let i = 0; i < groups.length; i++) {
                 const startingTick = groups[i][0].tick - 333
                 const endingTick = groups[i][groups[i].length - 1].tick + 333
-                log("group " + i + ": ")
-                log("starting tick: " + startingTick)
-                log("ending tick: " + endingTick)
 
-                const demoName = path.basename(filePath, path.extname(filePath));
-                const command = `start /wait cmd /c "` +
-                    `RenderDemo.exe ` +
-                    `-exepath "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Team Fortress 2\\tf_win64.exe" ` +
-                    `-demo "${path.resolve(filePath)}" ` +
-                    `-start ${startingTick} -end ${endingTick} ` +
-                    `-out "${demoName}-${startingTick}-${endingTick}.mov" ` +
-                    `-launch "-width 1920 -height 1080" ` +
-                    `-cmd "spec_player ${recorderName}; spec_mode 5; cl_drawhud 0; tf_use_min_viewmodels 0" ` +
-                    `-sdrdir "${path.resolve(DemoManager.SVR_DIR)}" ` +
-                    `-loglevel debug` +
-                    `"`;
+                command += `${startingTick}:${endingTick}`
 
-                try {
-                    console.log(`Starting render for group ${i}...`);
-                    const { stdout, stderr } = await execPromise(command, { cwd: DemoManager.RENDER_DEMO_DIR });
-                    
-                    console.log(`RenderDemo completed for group ${i}`);
-                    console.log(stdout);
-                    if (stderr) console.log(stderr);
-                } catch (error) {
-                    console.error(`RenderDemo error for group ${i}:`, error);
-                    // Decide whether to continue or break on error
-                    // throw error; // Uncomment to stop on first error
+                // Is there another one?
+                if (i + 1 !== groups.length) {
+                    command += ","
                 }
             }
-            
+
+            try {
+                const { stdout, stderr } = await execPromise(command, { cwd: DemoManager.RENDER_DEMO_DIR });
+                console.log(`RenderDemo completed`);
+                console.log(stdout);
+
+                if (stderr) {
+                    console.log(stderr)
+                }
+            } catch (error) {
+                console.error(`RenderDemo error:`, error);
+            }
+
             console.log("All rendering tasks completed");
         }
     }
