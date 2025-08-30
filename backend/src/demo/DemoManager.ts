@@ -99,8 +99,8 @@ export class DemoManager {
             `RenderDemo.exe ` +
             `-exepath "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Team Fortress 2\\tf_win64.exe" ` +
             `-demo "${path.resolve(filePath)}" ` +
-            `-out "movie.mov" ` +
             `-launch "-width 1920 -height 1080" ` +
+            `-out "movie" ` +
             `-cmd "cl_drawhud 0; tf_use_min_viewmodels 0" ` +
             `-sdrdir "${path.resolve(DemoManager.SVR_DIR)}" ` +
             `-loglevel debug ` +
@@ -120,31 +120,31 @@ export class DemoManager {
             }
         }
 
-        // try {
-        //     const { stdout, stderr } = await execPromise(command, { cwd: DemoManager.RENDER_DEMO_DIR });
-        //     console.log(`RenderDemo completed`);
-        //     console.log(stdout);
+        try {
+            const { stdout, stderr } = await execPromise(command, { cwd: DemoManager.RENDER_DEMO_DIR });
+            console.log(`RenderDemo completed`);
+            console.log(stdout);
 
-        //     if (stderr) {
-        //         console.log(stderr)
-        //     }
-        // } catch (error) {
-        //     console.error(`RenderDemo error:`, error);
-        // }
+            if (stderr) {
+                console.log(stderr)
+            }
+        } catch (error) {
+            console.error(`RenderDemo error:`, error);
+        }
 
         console.log("All rendering tasks completed");
 
-        this.processRenderedVideos();
+        this.processRenderedVideos(demoName);
     }
 
-    public async processRenderedVideos(): Promise<void> {
+    public async processRenderedVideos(demoName: string): Promise<void> {
         const moviesDir = path.join(DemoManager.SVR_DIR, "movies");
 
         try {
             // Get all MOV files
             console.log("Finding MOV files...");
             const files = await fs.readdir(moviesDir);
-            const movFiles = files.filter(file => file.endsWith('.mov') && file.startsWith('movie')); // Changed from .avi to .mov
+            const movFiles = files.filter(file => file.endsWith('.mov') && file.startsWith('movie'));
 
             if (movFiles.length === 0) {
                 console.log("No MOV files found.");
@@ -200,7 +200,7 @@ export class DemoManager {
 
             // Concatenate all MP4 files
             console.log("Concatenating videos...");
-            const concatCommand = `"${ffmpeg}" -f concat -safe 0 -i "${fileListPath}" -c copy "${path.join(moviesDir, 'final_output.mp4')}"`;
+            const concatCommand = `"${ffmpeg}" -f concat -safe 0 -i "${fileListPath}" -c copy "${path.join(moviesDir, `${demoName}-combined.mp4`)}"`;
             await execPromise(concatCommand);
 
             // Cleanup temp files and MOV files
@@ -209,10 +209,10 @@ export class DemoManager {
             await fs.unlink(fileListPath);
 
             // Delete all MOV files
-            // console.log(`Deleting ${movFiles.length} original MOV files...`);
-            // for (const movFile of movFiles) { // Changed variable name
-            //     await fs.unlink(path.join(moviesDir, movFile));
-            // }
+            console.log(`Deleting ${movFiles.length} original MOV files...`);
+            for (const movFile of movFiles) {
+                await fs.unlink(path.join(moviesDir, movFile));
+            }
 
             // Delete all individual MP4 files (movie0.mp4, movie1.mp4, etc.)
             console.log(`Deleting ${movFiles.length} individual mp4 files...`);
@@ -220,7 +220,7 @@ export class DemoManager {
                 await fs.unlink(path.join(moviesDir, mp4File));
             }
 
-            console.log("Video processing completed! Final video: bin/svr/movies/final_output.mp4");
+            console.log(`Video processing completed! Final video: bin/svr/movies/${demoName}-combined.mp4`);
         } catch (error) {
             console.error("Video processing error:", error);
         }
