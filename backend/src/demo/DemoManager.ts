@@ -109,8 +109,10 @@ export class DemoManager {
 
         // Process groups sequentially
         for (let i = 0; i < groups.length; i++) {
+            // 333 - 5 seconds
+            // 133 - 2 seconds
             const startingTick = groups[i][0].tick - 333
-            const endingTick = groups[i][groups[i].length - 1].tick + 333
+            const endingTick = groups[i][groups[i].length - 1].tick + 133
 
             command += `${startingTick}:${endingTick}`
 
@@ -141,7 +143,6 @@ export class DemoManager {
         const moviesDir = path.join(DemoManager.SVR_DIR, "movies");
 
         try {
-            // Get all MOV files
             console.log("Finding MOV files...");
             const files = await fs.readdir(moviesDir);
             const movFiles = files.filter(file => file.endsWith('.mov') && file.startsWith('movie'));
@@ -151,13 +152,27 @@ export class DemoManager {
                 return;
             }
 
-            console.log(`Found ${movFiles.length} MOV files`); // Updated message
+            console.log(`Found ${movFiles.length} MOV files`);
 
-            // Convert all MOV files to MP4 in parallel with proper error handling
-            console.log("Converting MOV files to MP4 in parallel...");
+            // Convert all MOV files to MP4 with DaVinci Resolve compatibility
+            console.log("Converting MOV files to DaVinci Resolve-compatible MP4...");
             const conversionPromises = movFiles.map(async (movFile) => {
                 const mp4File = movFile.replace('.mov', '.mp4');
-                const convertCommand = `"${ffmpeg}" -i "${path.join(moviesDir, movFile)}" -c:v libx264 -preset fast -crf 20 -c:a aac -b:a 192k "${path.join(moviesDir, mp4File)}"`;
+
+                // Enhanced command for DaVinci Resolve compatibility
+                const convertCommand = `"${ffmpeg}" -i "${path.join(moviesDir, movFile)}" ` +
+                    `-c:v libx264 ` +                    // Use H.264 codec
+                    `-profile:v high ` +                  // High profile for better compatibility
+                    `-level 4.1 ` +                      // Level 4.1 for broad compatibility
+                    `-pix_fmt yuv420p ` +                 // Force 8-bit 4:2:0 (most compatible)
+                    `-preset fast ` +                     // Fast encoding
+                    `-crf 18 ` +                          // High quality (lower = better)
+                    `-movflags +faststart ` +             // Optimize for streaming/editing
+                    `-c:a aac ` +                         // AAC audio codec
+                    `-b:a 192k ` +                        // Audio bitrate
+                    `-ar 48000 ` +                        // 48kHz sample rate (standard for video)
+                    `"${path.join(moviesDir, mp4File)}"`;
+
                 console.log(`Converting ${movFile} to ${mp4File}...`);
 
                 try {
@@ -170,10 +185,7 @@ export class DemoManager {
                 }
             });
 
-            // Wait for all conversions to complete
             const results = await Promise.all(conversionPromises);
-
-            // Check if all conversions succeeded
             const failures = results.filter(r => !r.success);
             if (failures.length > 0) {
                 console.error(`${failures.length} conversions failed. Aborting.`);
@@ -188,7 +200,6 @@ export class DemoManager {
             const movieMp4Files = mp4Files
                 .filter(file => file.endsWith('.mp4') && file.startsWith('movie'))
                 .sort((a, b) => {
-                    // Extract number from filename for proper sorting
                     const numA = parseInt(a.match(/movie(\d+)\.mp4/)?.[1] || '0');
                     const numB = parseInt(b.match(/movie(\d+)\.mp4/)?.[1] || '0');
                     return numA - numB;
@@ -198,29 +209,37 @@ export class DemoManager {
             const fileListPath = path.join(moviesDir, 'filelist.txt');
             await fs.writeFile(fileListPath, fileListContent);
 
-            // Concatenate all MP4 files
-            console.log("Concatenating videos...");
-            const concatCommand = `"${ffmpeg}" -f concat -safe 0 -i "${fileListPath}" -c copy "${path.join(moviesDir, `${demoName}-combined.mp4`)}"`;
+            // Concatenate with re-encoding to ensure consistency
+            console.log("Concatenating videos with consistent encoding...");
+            const concatCommand = `"${ffmpeg}" -f concat -safe 0 -i "${fileListPath}" ` +
+                `-c:v libx264 ` +                     // Re-encode video for consistency
+                `-profile:v high ` +
+                `-level 4.1 ` +
+                `-pix_fmt yuv420p ` +                 // Ensure 8-bit output
+                `-preset fast ` +
+                `-crf 18 ` +
+                `-movflags +faststart ` +
+                `-c:a aac ` +
+                `-b:a 192k ` +
+                `-ar 48000 ` +
+                `"${path.join(moviesDir, `${demoName}-combined.mp4`)}"`;
+
             await execPromise(concatCommand);
 
-            // Cleanup temp files and MOV files
+            // Cleanup
             console.log("Cleaning up files...");
-            // Delete filelist.txt
             await fs.unlink(fileListPath);
 
-            // Delete all MOV files
-            console.log(`Deleting ${movFiles.length} original MOV files...`);
             for (const movFile of movFiles) {
                 await fs.unlink(path.join(moviesDir, movFile));
             }
 
-            // Delete all individual MP4 files (movie0.mp4, movie1.mp4, etc.)
-            console.log(`Deleting ${movFiles.length} individual mp4 files...`);
             for (const mp4File of movieMp4Files) {
                 await fs.unlink(path.join(moviesDir, mp4File));
             }
 
             console.log(`Video processing completed! Final video: bin/svr/movies/${demoName}-combined.mp4`);
+
         } catch (error) {
             console.error("Video processing error:", error);
         }
